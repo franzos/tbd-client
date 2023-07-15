@@ -17,7 +17,7 @@ import type { ListResponse, PublicEntry } from '@tbd/common'
 import Entry from './entry.vue'
 
 const props = defineProps({
-  data: Object as PropType<ListResponse<PublicEntry>>,
+  data: Object as PropType<ListResponse<PublicEntry> | null>,
   cols: {
     type: Number,
     default: 4,

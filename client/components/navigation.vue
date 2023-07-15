@@ -7,13 +7,12 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import { NMenu, MenuOption, NIcon } from 'naive-ui'
-import { HomeOutline as HomeIcon, LogInOutline as LoginIcon } from '@vicons/ionicons5'
+import { HomeOutline as HomeIcon, LogInOutline as LoginIcon, AddOutline as AddIcon } from '@vicons/ionicons5'
 
 const menu = [
   {
     label: 'Home',
-    key: 'home',import getConfig from 'next/config'
-
+    key: 'home',
     to: '/',
     virtual: false,
     icon: HomeIcon,
@@ -25,6 +24,14 @@ const menu = [
     to: '/login',
     virtual: false,
     icon: LoginIcon,
+  },
+  {
+    label: 'Post Entry',
+    key: 'postEntry',
+    show: '*',
+    to: '/entries/post',
+    virtual: false,
+    icon: AddIcon,
   },
 ]
 
