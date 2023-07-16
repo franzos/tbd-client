@@ -8,17 +8,17 @@ Find out more about TBD at [https://github.com/franzos/tbd](https://github.com/f
 
 ## Thougts on Vue (Nuxt.js) vs React (Next.js)
 
-Nuxt
+### Nuxt
 
-- Quickly fetching some data is much easier with `useFetch` (vs `fetch`)
-- Compilation during development is 10x faster
+- (+) Quickly fetching some data is much easier with `useFetch` (vs `fetch`)
+- (+) Compilation during development is 10x faster
 
-Next
+Vue 3 composition API feels a little like react function components.
 
-- Server versus client components are just horrible [ref](https://nextjs.org/docs/getting-started/react-essentials#client-components)
-- Accessing runtime config requires setup [ref](https://nextjs.org/docs/pages/api-reference/next-config-js/runtime-configuration)
-- You have to whitelist image hosts in the config [ref](https://nextjs.org/docs/messages/next-image-unconfigured-host)
-- Components can be cleaner in react; for ex:
+### Next
+
+- (-) You have to whitelist image hosts in the config [ref](https://nextjs.org/docs/messages/next-image-unconfigured-host)
+- (+) Components can be cleaner in react; for ex:
 
 Vue:
 
