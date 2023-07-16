@@ -9,6 +9,13 @@ import { RouterLink } from 'vue-router'
 import { NMenu, MenuOption, NIcon } from 'naive-ui'
 import { HomeOutline as HomeIcon, LogInOutline as LoginIcon, AddOutline as AddIcon } from '@vicons/ionicons5'
 
+const props = defineProps({
+  isLoggedIn: {
+    type: Boolean,
+    default: false,
+  },
+})
+
 const menu = [
   {
     label: 'Home',
@@ -39,7 +46,7 @@ function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) })
 }
 
-const menuOptions: MenuOption[] = menu.flatMap(item => {
+function formatItem(item: (typeof menu)[0]) {
   return {
     label: () =>
       h(
@@ -52,6 +59,18 @@ const menuOptions: MenuOption[] = menu.flatMap(item => {
     key: item.key,
     icon: renderIcon(item.icon),
   }
+}
+
+const menuOptions: Ref<MenuOption[]> = computed(() => {
+  return props.isLoggedIn
+    ? menu
+        .filter(item => item.show !== 'loggedOut')
+        .flatMap(item => {
+          return formatItem(item)
+        })
+    : menu.flatMap(item => {
+        return formatItem(item)
+      })
 })
 
 function handleUpdateValue(key: string, item: MenuOption) {

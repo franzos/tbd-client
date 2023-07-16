@@ -1,12 +1,58 @@
+import { PublicUser } from '@tbd/common'
 import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', () => {
   const { baseUrl } = useRuntimeConfig().public
 
-  let user = ref(null)
+  const session = useCookie<{
+    token: string
+    loggedInAt: number
+  }>('session')
+
+  let user: Ref<PublicUser> | Ref<null> = ref(null)
   let token = ref<string>('')
   let isLoggedIn = ref<boolean>(false)
   let isBusy = ref<boolean>(false)
+
+  async function loadUser() {
+    if (token.value) {
+      const url = `${baseUrl}/account/me`
+      try {
+        const res = await fetch(url, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token.value}`,
+          },
+          method: 'GET',
+        })
+        if (res.ok) {
+          const body = await res.json()
+          user.value = body
+        } else {
+          const body = await res.json()
+          console.error(body)
+          user.value = null
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+  }
+
+  async function restoreSession() {
+    if (isLoggedIn.value) {
+      console.log('already logged in')
+      return
+    }
+    if (session.value && session.value.loggedInAt !== 0 && session.value.token !== '') {
+      console.log('restoring session')
+      token.value = session.value.token
+      isLoggedIn.value = true
+      await loadUser()
+      return
+    }
+    console.log('no session to restore')
+  }
 
   async function signup(data: {
     name?: string
@@ -64,6 +110,10 @@ export const useAuthStore = defineStore('auth', () => {
         const body = await res.json()
         token.value = body.token
         isLoggedIn.value = true
+        session.value = {
+          token: body.token,
+          loggedInAt: Date.now(),
+        }
         return {
           success: true,
         }
@@ -86,11 +136,23 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function logout() {
+    token.value = ''
+    isLoggedIn.value = false
+    session.value = {
+      token: '',
+      loggedInAt: 0,
+    }
+  }
+
   return {
     user,
+    token,
     isLoggedIn,
     isBusy,
     signup,
     login,
+    logout,
+    restoreSession,
   }
 })
