@@ -1,5 +1,14 @@
 <template>
   <n-page-header>
+    <template #header>
+      <n-breadcrumb>
+        <n-breadcrumb-item>Home</n-breadcrumb-item>
+        <n-breadcrumb-item v-for="item in breadcrumbs" :key="item.link" :on-click="() => goToLink(item.link)">{{
+          item.text
+        }}</n-breadcrumb-item>
+        <n-breadcrumb-item>{{ entryType }}</n-breadcrumb-item>
+      </n-breadcrumb>
+    </template>
     <n-grid x-gap="12" :cols="3" :y-gap="10">
       <n-grid-item>
         <Sidebar />
@@ -9,34 +18,35 @@
       </n-grid-item>
       <n-grid-item> </n-grid-item>
     </n-grid>
-    <template #header>
-      <n-breadcrumb>
-        <n-breadcrumb-item>Home</n-breadcrumb-item>
-        <n-breadcrumb-item v-for="item in breadcrumbs" :key="item.link" :on-click="() => goToLink(item.link)">{{
-          item.text
-        }}</n-breadcrumb-item>
-        <n-breadcrumb-item>{{ entryType }} jellw</n-breadcrumb-item>
-      </n-breadcrumb>
-    </template>
     <template #footer>{{ entry?.created_at }}</template>
   </n-page-header>
 
-  <n-page-header subtitle="In the area ...">
-    <Entries :data="entries" :cols="6" />
+  <n-page-header>
     <template #title>
       <n-h2>Related in {{ entryType }}</n-h2>
     </template>
+    <!-- <Entries :data="entries" :cols="6" /> -->
+
+    <n-grid x-gap="12" :cols="3" :y-gap="10">
+      <n-grid-item></n-grid-item>
+      <n-grid-item>
+        <div v-if="entries">
+          <div v-for="entry of entries.items" :key="entry.id">
+            <EntryPreview :entry="entry" style="margin-bottom: 1rem" />
+          </div>
+        </div>
+      </n-grid-item>
+      <n-grid-item></n-grid-item>
+    </n-grid>
   </n-page-header>
 </template>
 
 <script setup lang="ts">
-import { NGrid, NGridItem, NH2, NButton, NDropdown, NPageHeader, NBreadcrumb, NBreadcrumbItem, NH3 } from 'naive-ui'
-import Entry from '~/components/entry.vue'
-import Entries from '~/components/entries.vue'
-import Sidebar from '~/components/sidebar.vue'
+import { NGrid, NGridItem, NH2, NPageHeader, NBreadcrumb, NBreadcrumbItem } from 'naive-ui'
 import type { ListResponse, PublicEntry } from '@tbd/common'
-import { Watch } from '@vicons/ionicons5'
-import { wordsToUrl, wordsFromUrl } from '~/tmplib/url-format'
+import Entry from '~/components/entry.vue'
+import EntryPreview from '~/components/entry-preview.vue'
+import Sidebar from '~/components/sidebar.vue'
 
 const userRoute = useRoute()
 const id = userRoute.params.id
@@ -57,13 +67,19 @@ const { data: entry } = await useFetch<PublicEntry>(`${baseUrl}/entries/${id}`, 
     id,
   },
 }).then(res => {
+  const title =
+    res.data.value && res.data.value.data && res.data.value.data.title
+      ? `${res.data.value.data.title} | TBD`
+      : 'No title | TBD'
+  const content =
+    res.data.value && res.data.value.data && res.data.value.data.description ? res.data.value.data.description : ''
   useHead({
-    title: res.data.title,
+    title,
     meta: [
       {
         hid: 'description',
         name: 'description',
-        content: res.data.description,
+        content,
       },
     ],
   })
@@ -98,7 +114,6 @@ const breadcrumbs = computed(() => {
 watchEffect(() => loadEntries(entryType.value))
 
 const goToLink = (link: string) => {
-  console.log('goToLink', link)
   const router = useRouter()
   if (link) {
     router.push(link)
