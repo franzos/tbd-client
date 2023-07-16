@@ -13,6 +13,8 @@ export interface PublicEntry {
   created_by?: PublicUser
   created_at: string
   updated_at: string
+  up_votes: number
+  down_votes: number
 }
 
 export interface EntryType {
