@@ -1,45 +1,65 @@
 <template>
   <n-card>
     <template #cover>
-      <div v-if="props.isEntryPage">
-        <n-image :src="coverImage" object-fit="fill" :lazy="true" />
-      </div>
-      <div v-else>
-        <nuxt-link :to="entryPath">
-          <n-image :src="coverImage" object-fit="fill" :lazy="true" preview-disabled />
-        </nuxt-link>
-      </div>
+      <n-image :src="coverImage" object-fit="fill" :lazy="true" />
     </template>
     <User :user="createdBy" />
-    {{ entryType }}
-    <div v-if="props.isEntryPage">
-      <n-h1>{{ title }}</n-h1>
-      <div style="margin-bottom: 2rem">
+    {{ type }}
+    <n-h2>{{ title }}</n-h2>
+    <n-space>
+      <div>
         <n-text>{{ description }}</n-text>
       </div>
-      <n-collapse v-if="props.entry && props.entry.data_signature">
-        <n-collapse-item title="Map" name="1">
-          <div style="height: 300px; width: 100%; background: #bbb">
-            <n-text>MAP</n-text>
-          </div>
-        </n-collapse-item>
-        <n-collapse-item title="Signed" name="2">
-          <n-space>
-            <n-text>The contents have been signed by the author:</n-text>
-            <n-code>
-              <pre>
+
+      <n-grid :cols="2">
+        <n-gi>
+          <n-text>
+            <small
+              ><b>{{ location }}</b></small
+            >
+          </n-text>
+        </n-gi>
+        <n-gi>
+          <n-button @click="castVote(1)" quaternary round>
+            <template #icon>
+              <n-icon><ArrowDownCircleOutline /></n-icon>
+            </template>
+            {{ downVotes }}
+          </n-button>
+          <n-button @click="castVote(0)" quaternary round>
+            <template #icon>
+              <n-icon><ArrowUpCircleOutline /></n-icon>
+            </template>
+            {{ upVotes }}
+          </n-button>
+        </n-gi>
+      </n-grid>
+    </n-space>
+
+    <n-collapse v-if="props.entry && props.entry.data_signature">
+      <n-collapse-item title="Map" name="1">
+        <div style="height: 300px; width: 100%; background: #bbb">
+          <n-text>MAP</n-text>
+        </div>
+      </n-collapse-item>
+      <n-collapse-item title="Signed" name="2">
+        <n-space>
+          <n-text>The contents have been signed by the author:</n-text>
+          <n-code>
+            <pre>
                 {{
-                  `
+                `
 ${props.entry.data_signature}
                 `
-                }}
-              </pre>
-            </n-code>
-            <n-text>You can verify this from your computer:</n-text>
-            <n-code>
-              <pre>
+              }}
+              </pre
+            >
+          </n-code>
+          <n-text>You can verify this from your computer:</n-text>
+          <n-code>
+            <pre>
                 {{
-                  `
+                `
   import json
   import requests
   import gnupg
@@ -60,72 +80,43 @@ ${props.entry.data_signature}
 
   print("Signature is valid" if verification.valid else "Signature is not valid")
   `
-                }}
-              </pre>
-            </n-code>
-          </n-space>
-        </n-collapse-item>
-      </n-collapse>
-    </div>
-    <div v-else>
-      <nuxt-link :to="entryPath">
-        <n-h3>{{ title }}</n-h3>
-      </nuxt-link>
-      <n-text>{{ maxChar(description, 100) }}</n-text>
-    </div>
+              }}
+              </pre
+            >
+          </n-code>
+        </n-space>
+      </n-collapse-item>
+    </n-collapse>
   </n-card>
 </template>
 
 <script setup lang="ts">
-import { NH1, NH3, NText, NCard, NImage, NCollapse, NCollapseItem, NCode, NSpace } from 'naive-ui'
-import { fileDownloadUrlHelper, maxChar } from '@tbd/common'
+import {
+  NH2,
+  NH3,
+  NText,
+  NCard,
+  NImage,
+  NCollapse,
+  NCollapseItem,
+  NCode,
+  NSpace,
+  NGi,
+  NIcon,
+  NButton,
+  NGrid,
+} from 'naive-ui'
+import { ArrowUpCircleOutline, ArrowDownCircleOutline } from '@vicons/ionicons5'
 import type { PublicEntry } from '@tbd/common'
 import User from '~/components/user.vue'
+import { useEntry } from '@/composables/entry'
 
 const props = defineProps({
   entry: Object as PropType<PublicEntry>,
-  isEntryPage: {
-    type: Boolean,
-    default: false,
-    required: false,
-  },
 })
 
 const { baseUrl } = useRuntimeConfig().public
 
-const entryPath = computed(() => {
-  return props.entry && props.entry.id ? `/entries/${props.entry.id}` : '/'
-})
-const entryType = computed(() => {
-  if (props.entry && props.entry.type) return props.entry.type
-  return 'No type'
-})
-const title = computed(() => {
-  if (props.entry && props.entry.data.title) return props.entry.data.title
-  return 'No title'
-})
-const description = computed(() => {
-  if (props.entry && props.entry.data.description) return props.entry.data.description
-  return 'No description'
-})
-const coverImage = computed(() => {
-  const fallback = 'https://via.placeholder.com/600x400'
-  const imageExtensions = ['jpg', 'png', 'gif', 'bmp', 'webp']
-  if (!props.entry || !props.entry.files) return fallback
-  const imageFiles = props.entry.files.filter(file => {
-    const extension = file.path.split('.').pop()
-    return extension && imageExtensions.includes(extension)
-  })
-  if (imageFiles.length > 0) {
-    return fileDownloadUrlHelper(baseUrl, imageFiles[0].id, imageFiles[0].path)
-  }
-  return fallback
-})
-
-const createdBy = computed(() => {
-  if (props.entry && props.entry.created_by) {
-    return props.entry.created_by
-  }
-  return undefined
-})
+const entrySnippets = useEntry(props.entry, baseUrl)
+const { title, type, description, coverImage, location, createdBy, upVotes, downVotes, castVote } = entrySnippets
 </script>

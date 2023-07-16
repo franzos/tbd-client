@@ -45,7 +45,7 @@ import {
   formFieldToFormRules,
   formFieldsToFormValue,
 } from '@tbd/common'
-import FormItem from '@/components/formItem.vue'
+import FormItem from '@/components/form-item.vue'
 
 const props = defineProps({
   entryType: {

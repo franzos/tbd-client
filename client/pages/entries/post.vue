@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { NGrid, NGridItem, NH4, NP, NText, NPageHeader, NBreadcrumb, NBreadcrumbItem, NCard } from 'naive-ui'
-import EntryForm from '@/components/entryForm.vue'
+import EntryForm from '@/components/entry-form.vue'
 import { EntryTypes } from '@tbd/common'
 
 const entryType = ref<string>('')

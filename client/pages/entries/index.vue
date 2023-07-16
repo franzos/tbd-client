@@ -1,13 +1,5 @@
 <template>
-  <Entries :data="data" />
+  <p>Nothing here, yet.</p>
 </template>
 
-<script setup lang="ts">
-import Entries from '~/components/entries.vue'
-const { baseUrl } = useRuntimeConfig().public
-const { data } = await useFetch(`${baseUrl}/entries`, {
-  query: {
-    limit: 50,
-  },
-})
-</script>
+<script setup lang="ts"></script>
