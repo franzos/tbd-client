@@ -18,14 +18,13 @@
         <n-space vertical>
           <div class="search">
             <n-auto-complete
-              v-model:value="cityName"
+              v-model:value="searchKeyword"
               :input-props="{
                 autocomplete: 'disabled',
               }"
-              :options="citiesOptions"
-              placeholder="Email"
+              :options="searchResults"
+              placeholder="Search ..."
             />
-            <n-button size="small" style="width: 100%">Search</n-button>
           </div>
 
           <div v-if="entries">
@@ -67,7 +66,18 @@
 </template>
 
 <script setup lang="ts">
-import { NAutoComplete, NButton, NGridItem, NGrid, NTag, NSpace, NH4, useLoadingBar, NCard, NP } from 'naive-ui'
+import {
+  NAutoComplete,
+  NGridItem,
+  NGrid,
+  NTag,
+  NSpace,
+  NH4,
+  useLoadingBar,
+  NCard,
+  NP,
+  AutoCompleteOption,
+} from 'naive-ui'
 import EntryPreview from '~/components/entry-preview.vue'
 import type { ListResponse, PublicEntry } from '@tbd/common'
 const { baseUrl } = useRuntimeConfig().public
@@ -104,8 +114,8 @@ const { data: entriesCities } = await useFetch<
   },
 })
 
-let cityName = ref<string>('')
-let citiesOptions = ref<any[]>([])
+let searchKeyword = ref<string>('')
+let searchResults = ref<AutoCompleteOption[]>([])
 
 let typeFilter = ref<string>('')
 let cityFilter = ref<string>('')
@@ -145,40 +155,49 @@ const setCityFilter = (city: string) => {
   filterEntries()
 }
 
-const setCityOptions = (cities: any[]) => {
-  citiesOptions.value =
-    cities && cities.length > 0
-      ? cities.map(city => {
+const setSearchResults = (
+  results:
+    | {
+        type: 'user' | 'entry' | 'city'
+        title: string
+        slug: string
+      }[]
+    | null,
+) => {
+  searchResults.value =
+    results && results.length > 0
+      ? results.map(r => {
           return {
-            label: `${city.city} (${city.results})`,
-            value: city.city,
+            label: r.title,
+            value: r.slug,
           }
         })
       : []
 }
 
-const filterCities = async (name: string) => {
+const filterResults = async (name: string) => {
   if (!name || name.length < 2) {
     return
   }
-  const res = await $fetch<any[]>(`${baseUrl}/entries/by-city/count`, {
+  const res = await $fetch<any[]>(`${baseUrl}/search`, {
     query: {
       limit: 50,
-      name,
+      keyword: searchKeyword.value,
     },
   })
-  setCityOptions(res)
+  setSearchResults(res)
 }
 
-await useFetch<any[]>(`${baseUrl}/entries/by-city/count`, {
+await useFetch<any[]>(`${baseUrl}/search`, {
   query: {
     limit: 50,
+    keyword: searchKeyword.value,
   },
 }).then(res => {
   console.log('YEAP')
   console.log(res.data.value)
-  setCityOptions(res.data.value)
+  setSearchResults(res.data.value)
 })
 
-watchEffect(() => filterCities(cityName.value))
+watchEffect(() => filterResults(searchKeyword.value))
 </script>
