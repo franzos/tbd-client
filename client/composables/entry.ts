@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useNotification } from 'naive-ui'
 
-export function useEntry(entry: PublicEntry, baseUrl: string) {
+export function useEntry(baseUrl: string, entry: PublicEntry) {
   const not = useNotification()
 
   const path = computed(() => {
@@ -11,7 +11,7 @@ export function useEntry(entry: PublicEntry, baseUrl: string) {
   })
 
   const title = computed(() => {
-    if (entry && entry.data.title) return entry.data.title
+    if (entry && entry.data && entry.data.title) return entry.data.title
     return 'No title'
   })
 
@@ -20,7 +20,7 @@ export function useEntry(entry: PublicEntry, baseUrl: string) {
   })
 
   const description = computed(() => {
-    if (entry && entry.data.description) return entry.data.description
+    if (entry && entry.data && entry.data.description) return entry.data.description
     return 'No description'
   })
 
@@ -38,11 +38,18 @@ export function useEntry(entry: PublicEntry, baseUrl: string) {
     return fallback
   })
 
-  const location = computed(() => {
+  const locationText = computed(() => {
     if (entry && entry.city && entry.city.name) {
       return `${entry.city.name}, ${entry.city.country_code}`
     }
     return `World`
+  })
+
+  const city = computed(() => {
+    if (entry && entry.city) {
+      return entry.city
+    }
+    return undefined
   })
 
   const createdBy = computed(() => {
@@ -115,7 +122,8 @@ export function useEntry(entry: PublicEntry, baseUrl: string) {
     type,
     description,
     coverImage,
-    location,
+    locationText,
+    city,
     createdBy,
     upVotes,
     downVotes,

@@ -1,5 +1,9 @@
 # TBD Clients and Libraries
 
+SHUTDOWN: I started working on this project to build a better community platform - until I discovered Nostr, which is what TBD could / should have been. I'm now working on Nostr instead. Checkout my Nostr library and web client here: https://github.com/franzos/nostr-ts.
+
+---
+
 - `./client` - TBD client built with Vue.js
 - `./client-react` - TBD client built with React
 - `./packages` - TBD libraries

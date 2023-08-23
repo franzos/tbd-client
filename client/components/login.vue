@@ -1,6 +1,11 @@
 <template>
   <div>
-    <n-radio-group :value="props.method" name="radiobuttongroup1" style="margin-bottom: 1rem">
+    <n-radio-group
+      v-if="props.activeForm != 'login'"
+      :value="props.method"
+      name="radiobuttongroup1"
+      style="margin-bottom: 1rem"
+    >
       <n-radio-button value="username" label="Username" @click="changeMethod('username')" />
       <n-radio-button value="email" label="Email" @click="changeMethod('email')" />
       <n-radio-button value="phone" label="Phone" @click="changeMethod('phone')" />
@@ -8,14 +13,14 @@
 
     <div v-if="props.activeForm === 'login'">
       <n-form ref="loginRef" :model="loginForm">
-        <n-form-item-row v-if="method === 'username'" label="Username">
-          <n-input :value="loginForm.username" v-on:input="loginForm.username = $event" placeholder="awesome" />
+        <n-form-item-row v-if="method === 'username'" :label="`Username / Email / Phone (${identifierType})`">
+          <n-input :value="identifierForm" v-on:input="identifierForm = $event" placeholder="awesome" />
         </n-form-item-row>
         <n-form-item-row v-if="method === 'email'" label="Email">
-          <n-input :value="loginForm.email" v-on:input="loginForm.email = $event" placeholder="idontuse@gmail.com" />
+          <n-input :value="identifierForm" v-on:input="identifierForm = $event" placeholder="idontuse@gmail.com" />
         </n-form-item-row>
         <n-form-item-row v-if="method === 'phone'" label="Phone">
-          <n-input :value="loginForm.phone" v-on:input="loginForm.phone = $event" placeholder="+4930US833833" />
+          <n-input :value="identifierForm" v-on:input="identifierForm = $event" placeholder="+4930US833833" />
         </n-form-item-row>
         <n-form-item-row label="Password">
           <n-input
@@ -92,6 +97,8 @@ import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 
 let loginRef = ref<FormInst | null>(null)
+
+const identifierForm = ref('') // The field for username, email, or phone
 
 const signupForm = ref({
   name: '',
@@ -175,17 +182,33 @@ const signup = async () => {
   const result = await authStore.signup(signupForm.value)
 }
 
+const identifierType = computed(() => {
+  if (/^[\w.-]+@[\w.-]+\.\w+$/.test(identifierForm.value)) {
+    return 'email'
+  } else if (/^\+?\d+$/.test(identifierForm.value)) {
+    return 'phone'
+  } else {
+    return 'username'
+  }
+})
+
 const login = async () => {
   let valid = false
-  if (loginForm.value.username !== '') {
+
+  if (/^[\w.-]+@[\w.-]+\.\w+$/.test(identifierForm.value)) {
+    loginForm.value.type = 'email'
+    loginForm.value.email = identifierForm.value
+    valid = true
+  } else if (/^\+?\d+$/.test(identifierForm.value)) {
+    loginForm.value.type = 'phone'
+    loginForm.value.phone = identifierForm.value
+    valid = true
+  } else {
+    loginForm.value.type = 'username'
+    loginForm.value.username = identifierForm.value
     valid = true
   }
-  if (loginForm.value.email !== '') {
-    valid = true
-  }
-  if (loginForm.value.phone !== '') {
-    valid = true
-  }
+
   if (!valid) {
     not.error({
       content: `Please enter ${props.method} and password`,

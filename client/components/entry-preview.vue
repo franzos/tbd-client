@@ -2,7 +2,13 @@
   <n-card>
     <div class="media">
       <div class="media-content">
-        <User :user="createdBy" />
+        <div class="media">
+          <div class="media-content">
+            <User :user="createdBy" />
+          </div>
+          <div class="media-right"></div>
+        </div>
+
         <nuxt-link :to="path">
           <n-p
             ><b>{{ maxChar(title, 40) }}</b></n-p
@@ -15,15 +21,12 @@
       </div>
     </div>
     <template #footer>
-      <n-grid :cols="2">
-        <n-gi>
-          <n-text>
-            <small
-              ><b>{{ location }}</b></small
-            >
-          </n-text>
-        </n-gi>
-        <n-gi>
+      <div class="media">
+        <div class="media-content">
+          <TypeTag :type="type" :city="city" />
+          <LocationTag :type="type" :city="city" />
+        </div>
+        <div class="media-right">
           <n-button @click="castVote(1)" quaternary round>
             <template #icon>
               <n-icon><ArrowDownCircleOutline /></n-icon>
@@ -36,18 +39,20 @@
             </template>
             {{ upVotes }}
           </n-button>
-        </n-gi>
-      </n-grid>
+        </div>
+      </div>
     </template>
   </n-card>
 </template>
 
 <script setup lang="ts">
-import { NP, NText, NCard, NImage, NButton, NIcon, NGi, NGrid } from 'naive-ui'
+import { NP, NText, NCard, NImage, NButton, NIcon, NGi, NGrid, NGridItem } from 'naive-ui'
 import { maxChar } from '@tbd/common'
 import type { PublicEntry } from '@tbd/common'
 import { ArrowUpCircleOutline, ArrowDownCircleOutline } from '@vicons/ionicons5'
 import User from '~/components/user.vue'
+import TypeTag from '~/components/type-tag.vue'
+import LocationTag from '~/components/location-tag.vue'
 import { useEntry } from '~/composables/entry'
 
 const props = defineProps({
@@ -56,6 +61,6 @@ const props = defineProps({
 
 const { baseUrl } = useRuntimeConfig().public
 
-const entrySnippets = useEntry(props.entry, baseUrl)
-const { path, title, type, description, coverImage, location, createdBy, upVotes, downVotes, castVote } = entrySnippets
+const entrySnippets = useEntry(baseUrl, props.entry)
+const { path, title, type, description, coverImage, city, createdBy, upVotes, downVotes, castVote } = entrySnippets
 </script>

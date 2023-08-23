@@ -25,6 +25,22 @@ const menu = [
     icon: HomeIcon,
   },
   {
+    label: 'Post Entry',
+    key: 'postEntry',
+    show: '*',
+    to: '/entries/post',
+    virtual: false,
+    icon: AddIcon,
+  },
+  {
+    label: 'Account',
+    key: 'account',
+    show: 'loggedIn',
+    to: '/account',
+    virtual: false,
+    icon: LoginIcon,
+  },
+  {
     label: 'Login',
     key: 'login',
     show: 'loggedOut',
@@ -33,12 +49,12 @@ const menu = [
     icon: LoginIcon,
   },
   {
-    label: 'Post Entry',
-    key: 'postEntry',
-    show: '*',
-    to: '/entries/post',
+    label: 'Logout',
+    key: 'logout',
+    show: 'loggedIn',
+    onclick: () => emitLogout(),
     virtual: false,
-    icon: AddIcon,
+    icon: LoginIcon,
   },
 ]
 
@@ -47,18 +63,25 @@ function renderIcon(icon: Component) {
 }
 
 function formatItem(item: (typeof menu)[0]) {
-  return {
-    label: () =>
-      h(
-        RouterLink,
-        {
-          to: item.to,
-        },
-        { default: () => item.label },
-      ),
-    key: item.key,
-    icon: renderIcon(item.icon),
-  }
+  return item.to
+    ? {
+        label: () =>
+          h(
+            RouterLink,
+            {
+              to: item.to,
+            },
+            { default: () => item.label },
+          ),
+        key: item.key,
+        icon: renderIcon(item.icon),
+      }
+    : {
+        label: item.label,
+        key: item.key,
+        icon: renderIcon(item.icon),
+        onClick: item.onclick,
+      }
 }
 
 const menuOptions: Ref<MenuOption[]> = computed(() => {
@@ -68,12 +91,21 @@ const menuOptions: Ref<MenuOption[]> = computed(() => {
         .flatMap(item => {
           return formatItem(item)
         })
-    : menu.flatMap(item => {
-        return formatItem(item)
-      })
+    : menu
+        .filter(item => item.show !== 'loggedIn')
+        .flatMap(item => {
+          return formatItem(item)
+        })
 })
 
 function handleUpdateValue(key: string, item: MenuOption) {
   console.log(key, item)
+}
+
+// emit
+const emits = defineEmits(['logout'])
+
+function emitLogout() {
+  emits('logout', {})
 }
 </script>

@@ -27,6 +27,6 @@ const props = defineProps({
 
 const { baseUrl } = useRuntimeConfig().public
 
-const entrySnippets = useEntry(props.entry, baseUrl)
+const entrySnippets = useEntry(baseUrl, props.entry)
 const { path, title, type, description, coverImage, createdBy } = entrySnippets
 </script>

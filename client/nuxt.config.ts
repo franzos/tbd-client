@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   modules: ['@pinia/nuxt'],
   routeRules: {
     // Homepage pre-rendered at build time
-    '/': { prerender: true },
+    '/': { swr: true },
     '/entries/**': { swr: true },
     // "/account/**": { ssr: false },
   },

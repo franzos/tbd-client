@@ -1,6 +1,6 @@
-const esbuild = require('esbuild');
-const { nodeExternalsPlugin } = require('esbuild-node-externals');
-const { esbuildDecorators } = require('@anatine/esbuild-decorators')
+import { build } from 'esbuild';
+import { nodeExternalsPlugin } from 'esbuild-node-externals';
+import { esbuildDecorators } from '@anatine/esbuild-decorators';
 
 const shared = {
     entryPoints: ['./src/index.ts'],
@@ -11,7 +11,7 @@ const shared = {
     plugins: [nodeExternalsPlugin()],
 }
 
-esbuild.build({
+build({
     ...shared,
     outfile: 'dist/index.cjs.js',
     format: 'cjs',
@@ -27,7 +27,7 @@ esbuild.build({
     process.exit(1);
 });
 
-esbuild.build({
+build({
     ...shared,
     outfile: 'dist/index.esm.js',
     format: 'esm',

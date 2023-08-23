@@ -6,7 +6,7 @@
         <n-breadcrumb-item v-for="item in breadcrumbs" :key="item.link" :on-click="() => goToLink(item.link)">{{
           item.text
         }}</n-breadcrumb-item>
-        <n-breadcrumb-item>{{ entryType }}</n-breadcrumb-item>
+        <n-breadcrumb-item>{{ type }}</n-breadcrumb-item>
       </n-breadcrumb>
     </template>
     <n-grid x-gap="12" :cols="3" :y-gap="10">
@@ -23,7 +23,7 @@
 
   <n-page-header>
     <template #title>
-      <n-h2>Related in {{ entryType }}</n-h2>
+      <n-h2>Related in {{ type }}</n-h2>
     </template>
     <!-- <Entries :data="entries" :cols="6" /> -->
 
@@ -31,8 +31,8 @@
       <n-grid-item></n-grid-item>
       <n-grid-item>
         <div v-if="entries">
-          <div v-for="entry of entries.items" :key="entry.id">
-            <EntryPreview :entry="entry" style="margin-bottom: 1rem" />
+          <div v-for="item of entries.items" :key="item.id">
+            <EntryPreview :entry="item" style="margin-bottom: 1rem" />
           </div>
         </div>
       </n-grid-item>
@@ -54,6 +54,7 @@ const { baseUrl } = useRuntimeConfig().public
 let entries = ref<ListResponse<PublicEntry>>()
 
 const loadEntries = async (type: string) => {
+  console.log('loadEntries', type)
   const res = await $fetch<ListResponse<PublicEntry>>(`${baseUrl}/entries${type ? `?type=${type}` : ''}`, {
     query: {
       limit: 6,
@@ -86,12 +87,10 @@ const { data: entry } = await useFetch<PublicEntry>(`${baseUrl}/entries/${id}`, 
   return res
 })
 
-const entryType = computed(() => {
-  return entry.value && entry.value.type ? entry.value.type : ''
-})
+// const { type } = useEntry(baseUrl, entry.value)
 
-const location = computed(() => {
-  return entry.value && entry.value.city ? entry.value.city : undefined
+const type = computed(() => {
+  return entry.value && entry.value.type ? entry.value.type : ''
 })
 
 const breadcrumbs = computed(() => {
@@ -111,7 +110,10 @@ const breadcrumbs = computed(() => {
   return crumbs
 })
 
-watchEffect(() => loadEntries(entryType.value))
+onMounted(() => {
+  console.log('onMounted')
+  loadEntries(type.value)
+})
 
 const goToLink = (link: string) => {
   const router = useRouter()

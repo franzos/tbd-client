@@ -1,4 +1,5 @@
-import { PublicUser } from '@tbd/common'
+import { PublicFile, PublicUser } from '@tbd/common'
+import { useNotification } from 'naive-ui'
 import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -9,7 +10,7 @@ export const useAuthStore = defineStore('auth', () => {
     loggedInAt: number
   }>('session')
 
-  let user: Ref<PublicUser> | Ref<null> = ref(null)
+  let user: Ref<PublicUser | {}> = ref({})
   let token = ref<string>('')
   let isLoggedIn = ref<boolean>(false)
   let isBusy = ref<boolean>(false)
@@ -31,7 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
         } else {
           const body = await res.json()
           console.error(body)
-          user.value = null
+          user.value = {}
         }
       } catch (error) {
         console.error(error)
@@ -52,6 +53,40 @@ export const useAuthStore = defineStore('auth', () => {
       return
     }
     console.log('no session to restore')
+  }
+
+  async function update(data: { profile?: {}; image?: PublicFile }) {
+    isBusy.value = true
+    const url = `${baseUrl}/account/me`
+    try {
+      const res = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token.value}`,
+        },
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        user.value.image = data.image
+        return {
+          success: true,
+        }
+      } else {
+        const body = await res.json()
+        return {
+          success: false,
+          message: body.message,
+        }
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: error,
+      }
+    } finally {
+      isBusy.value = false
+    }
   }
 
   async function signup(data: {
@@ -150,6 +185,7 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     isLoggedIn,
     isBusy,
+    update,
     signup,
     login,
     logout,

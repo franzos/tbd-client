@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navigation :is-logged-in="isLoggedIn" />
+    <Navigation :is-logged-in="isLoggedIn" v-on:logout="auth.logout()" />
     <slot />
     <div class="container footer has-bg-grey">
       <n-space justify="center">
